@@ -117,18 +117,27 @@ void NCV78723Driver::begin()
 
 void NCV78723Driver::set(Channel ch, float value)
 {
-    if (value < 0.0f) value = 0.0f;
-    if (value > 1.0f) value = 1.0f;
-
-    m_values[ch] = value;
+    value = constrain(value, 0.0f, 1.0f);
 
     uint32_t duty = (uint32_t)(value * MAX_DUTY);
 
-    if (ch == CH1)
-        ledcWriteDuty(LEDC_CH1, duty);
-    else
-        ledcWriteDuty(LEDC_CH2, duty);
+    // Skip if unchanged
+    static uint32_t lastDuty[2] = { UINT32_MAX, UINT32_MAX };
+    if (lastDuty[ch] == duty)
+        return;
+
+    lastDuty[ch] = duty;
+    m_values[ch] = value;
+
+    // if (ch == CH1)
+    //     ledcWriteDuty(LEDC_CH1, duty);
+    // else
+    //     ledcWriteDuty(LEDC_CH2, duty);
+    
+    Serial.printf("%u,%u\n", lastDuty[CH1], lastDuty[CH2]);
+
 }
+
 
 float NCV78723Driver::get(Channel ch) const
 {
