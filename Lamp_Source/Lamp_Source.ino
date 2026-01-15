@@ -252,6 +252,7 @@ void loop()
             buttonHandled = true;
             lastInputTime = now;
         }
+        // leds.printDiagnostics();
     }
 
     // =========================================================

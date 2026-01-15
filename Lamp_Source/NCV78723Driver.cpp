@@ -112,8 +112,8 @@ void NCV78723Driver::begin()
 
     // Configure device
     wr(REG_TSD_REC, 0x01);
-    wr(REG_BUCK1_CURR, pack_buck_curr(0x01, 0x70));
-    wr(REG_BUCK2_CURR, pack_buck_curr(0x01, 0x70));
+    wr(REG_BUCK1_CURR, pack_buck_curr(0x01, 0x9E));
+    wr(REG_BUCK2_CURR, pack_buck_curr(0x01, 0x9E));
     wr(REG_TOFF,       pack_toff(0x10, 0x10));
     wr(REG_BUCK_CTRL,  pack_buck_ctrl(0x0, true, true));
     wr(REG_LEDSEL_DUR, (8 << 4) | 8);
