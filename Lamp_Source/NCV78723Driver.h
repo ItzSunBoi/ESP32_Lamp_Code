@@ -47,7 +47,7 @@ private:
     static constexpr ledc_mode_t      LEDC_MODE  = LEDC_HIGH_SPEED_MODE;
     static constexpr ledc_timer_t     LEDC_TIMER = LEDC_TIMER_0;
     static constexpr ledc_timer_bit_t LEDC_BITS  = LEDC_TIMER_12_BIT;
-    static constexpr uint32_t         LEDC_FREQ  = 1000;
+    static constexpr uint32_t         LEDC_FREQ  = 300;
     static constexpr ledc_channel_t   LEDC_CH1   = LEDC_CHANNEL_0;
     static constexpr ledc_channel_t   LEDC_CH2   = LEDC_CHANNEL_1;
 
