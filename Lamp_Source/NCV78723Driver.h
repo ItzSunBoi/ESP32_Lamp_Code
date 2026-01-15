@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include <SPI.h>
-#include "driver/ledc.h"
 
 class NCV78723Driver
 {
@@ -16,7 +15,7 @@ public:
     // Call once from setup()
     void begin();
 
-    // Set output level (0.0 → 1.0)
+    // Set output level (0.0 → 1.0) using ANALOG dimming (SPI current programming)
     void set(Channel ch, float value);
 
     // Get last set value (0.0 → 1.0)
@@ -40,18 +39,16 @@ private:
     static constexpr int PIN_MOSI = 23;
     static constexpr int PIN_CS   = 5;
     static constexpr int PIN_RSTB = 17;
+
+    // LEDCTRL pins (hold HIGH for analog dimming)
     static constexpr int PIN_LED1 = 21;
     static constexpr int PIN_LED2 = 16;
 
-    // ---------- LEDC ----------
-    static constexpr ledc_mode_t      LEDC_MODE  = LEDC_HIGH_SPEED_MODE;
-    static constexpr ledc_timer_t     LEDC_TIMER = LEDC_TIMER_0;
-    static constexpr ledc_timer_bit_t LEDC_BITS  = LEDC_TIMER_12_BIT;
-    static constexpr uint32_t         LEDC_FREQ  = 300;
-    static constexpr ledc_channel_t   LEDC_CH1   = LEDC_CHANNEL_0;
-    static constexpr ledc_channel_t   LEDC_CH2   = LEDC_CHANNEL_1;
-
-    static constexpr uint32_t MAX_DUTY = (1u << LEDC_BITS) - 1;
+    // ---------- Analog dimming config ----------
+    // Per your goal: ~600mA max. Use Range 3 (ISENS=0x02) and VTHR_MAX ~0x9E.
+    static constexpr uint8_t ISENS_RANGE = 0x02; // BUCKx_ISENS_THR[1:0]
+    static constexpr uint8_t VTHR_MAX    = 0x9E; // BUCKx_VTHR[7:0] @ ~600mA typ (Range 3)
+    static constexpr uint8_t VTHR_MIN_ON = 0x00; // min current when "on" (can raise if you want)
 
     // ---------- SPI ----------
     SPIClass m_spi = SPIClass(VSPI);
@@ -59,16 +56,19 @@ private:
 
     // ---------- State ----------
     float m_values[2] = {0.0f, 0.0f};
+    bool  m_enabled[2] = {false, false};
 
     // ---------- Low-level helpers ----------
     static uint16_t makeWriteFrame(uint8_t addr4, uint16_t data10);
     static uint16_t pack_buck_curr(uint8_t isens, uint8_t vthr);
     static uint16_t pack_toff(uint8_t t1, uint8_t t2);
-    static uint16_t pack_buck_ctrl(uint8_t fso, bool en1, bool en2);
+    static uint16_t pack_buck_ctrl(uint8_t fso_md, bool en1, bool en2);
 
     uint16_t spiXfer16(uint16_t tx);
     void wr(Reg r, uint16_t data10);
-    void ledcWriteDuty(ledc_channel_t ch, uint32_t duty);
+
+    void setBuckEnabled(Channel ch, bool en);
+    void setBuckCurrent(Channel ch, uint8_t vthr);
 };
 
 #endif
